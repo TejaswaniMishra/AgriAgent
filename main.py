@@ -114,9 +114,22 @@ async def download_media(url: str, ext: str) -> str:
     os.makedirs("temp", exist_ok=True)
     filepath = f"temp/{uuid.uuid4().hex}.{ext}"
     
-    auth = (os.getenv("TWILIO_ACCOUNT_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
+    # Use Twilio credentials for auth
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, auth=auth)
+        response = await client.get(
+            url, 
+            auth=(account_sid, auth_token),
+            follow_redirects=True,  # Important — Twilio redirects media URLs
+            timeout=30.0
+        )
+        
+        print(f"Media download status: {response.status_code}")
+        print(f"Content type: {response.headers.get('content-type')}")
+        print(f"Content length: {len(response.content)} bytes")
+        
         with open(filepath, "wb") as f:
             f.write(response.content)
     
