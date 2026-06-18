@@ -1,7 +1,7 @@
 import os
 from utils.llm import ask_gemini
 
-def analyze_pest(image_path: str) -> str:
+def analyze_pest(image_path: str, language: str = "hi") -> str:
     prompt = """
     You are an expert Indian agricultural scientist with 20 years of experience.
     
@@ -25,4 +25,4 @@ def analyze_pest(image_path: str) -> str:
     - If the image is not a crop/plant, politely say so in Hindi
     """
     
-    return ask_gemini(prompt, image_path=image_path)
+    return ask_gemini(prompt, image_path=image_path,language=language)

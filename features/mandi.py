@@ -5,15 +5,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_mandi_prices(text: str) -> str:
+def get_mandi_prices(text: str, language: str = "hi") -> str:
     # Step 1 — Extract commodity and location
     extract_prompt = f"""
-    किसान ने कहा: "{text}"
-    इस वाक्य से सिर्फ दो चीजें निकालो:
-    1) फसल का नाम English में (जैसे Wheat, Rice, Onion, Potato, Sugarcane)
-    2) जिले का नाम English में (जैसे Gorakhpur, Lucknow, Varanasi)
+    The farmer said: "{text}"
+    Extract only two things:
+    1) Crop name in English (like Wheat, Rice, Onion, Potato)
+    2) District name in English (like Gorakhpur, Lucknow, Varanasi)
     
-    सिर्फ इस format में जवाब दो, कुछ और मत लिखो:
+    Reply ONLY in this exact format, nothing else:
     COMMODITY: Wheat
     DISTRICT: Gorakhpur
     """
@@ -35,28 +35,25 @@ def get_mandi_prices(text: str) -> str:
     if prices:
         price_text = "\n".join(prices)
         response_prompt = f"""
-        नीचे {district} की मंडियों में {commodity} के आज के भाव हैं:
+        These are today's mandi prices for {commodity} in {district}:
         {price_text}
         
-        इसे एक किसान को सरल हिंदी में बताओ।
-        मंडी का नाम, न्यूनतम भाव, अधिकतम भाव और मॉडल भाव बताओ।
-        अंत में एक सलाह दो।
+        Tell this to a farmer in simple language.
+        Mention market name, min price, max price, modal price per quintal.
+        End with one advice on whether to sell now or wait.
         """
-        return ask_gemini(response_prompt)
+        return ask_gemini(response_prompt, language=language)  # language here
     else:
-        # Fallback — LLM gives general price range based on training data
         fallback_prompt = f"""
-        किसान ने {district}, उत्तर प्रदेश में {commodity} का मंडी भाव पूछा है।
-        
-        तुम एक अनुभवी कृषि विशेषज्ञ हो। इस फसल के बारे में बताओ:
-        1) इस समय UP में इस फसल का अनुमानित भाव क्या है (per quintal)
-        2) भाव किन बातों पर निर्भर करता है
-        3) सही भाव जानने के लिए agmarknet.gov.in या नजदीकी मंडी से संपर्क करें
-        
-        सरल हिंदी में, 4-5 वाक्य में जवाब दो।
+        A farmer asked about {commodity} mandi price in {district}, Uttar Pradesh.
+        You are an experienced agricultural expert.
+        Tell them:
+        1) Approximate current price range per quintal in UP
+        2) What factors affect the price
+        3) To check agmarknet.gov.in or nearby mandi for exact price
+        Keep it to 4-5 sentences, practical and helpful.
         """
-        return ask_gemini(fallback_prompt)
-
+        return ask_gemini(fallback_prompt, language=language)
 
 def fetch_from_data_gov(commodity: str, district: str) -> list:
     """Try data.gov.in API with short timeout"""

@@ -5,16 +5,16 @@ def detect_intent(text: str) -> str:
     Returns one of: 'mandi', 'pest', 'scheme', 'advisory', 'unknown'
     """
     prompt = f"""
-    एक किसान ने यह कहा: "{text}"
+    A farmer said: "{text}"
     
-    नीचे दिए गए विकल्पों में से केवल एक शब्द में जवाब दो:
-    - mandi (अगर वो मंडी भाव, कीमत, रेट पूछ रहे हैं)
-    - pest (अगर वो फसल की बीमारी, कीड़े, या फोटो भेजी है)
-    - scheme (अगर वो सरकारी योजना, सब्सिडी, पैसा पूछ रहे हैं)
-    - advisory (अगर वो फसल की देखभाल, खाद, पानी, मौसम पूछ रहे हैं)
-    - unknown (अगर कुछ और है)
+    Based on the text above, respond with exactly ONE word from the options below:
+    - mandi (If they are asking about market prices, crop rates, or costs [मंडी भाव, कीमत, रेट])
+    - pest (If they are asking about crop diseases, insects, pests, or have sent a photo [फसल की बीमारी, कीड़े, फोटो])
+    - scheme (If they are asking about government schemes, subsidies, or financial aid [सरकारी योजना, सब्सिडी, पैसा])
+    - advisory (If they are asking about crop care, fertilizers, watering, or weather [फसल की देखभाल, खाद, पानी, मौसम])
+    - unknown (If it is anything else)
     
-    सिर्फ एक शब्द लिखो, कुछ और नहीं।
+    Respond with ONLY the single classification word. Do not write any other text.
     """
     result = ask_gemini(prompt).strip().lower()
     
