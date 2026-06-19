@@ -223,5 +223,185 @@
     "documents": "Land records, Aadhaar, bank account",
     "how_to_apply": "Apply through state horticulture/agriculture department implementing MIF projects",
     "category": "irrigation"
+  },
+  {
+    "name": "Rashtriya Gokul Mission",
+    "name_hindi": "राष्ट्रीय गोकुल मिशन",
+    "benefit": "Financial support for indigenous cattle breed conservation and dairy productivity improvement, includes support for setting up Gokul Grams (integrated cattle development centers)",
+    "eligibility": "Farmers, dairy cooperatives, and breeders rearing indigenous cattle breeds",
+    "documents": "Aadhaar, land/shed documents, bank account",
+    "how_to_apply": "Apply through state Animal Husbandry Department or National Dairy Development Board (NDDB)",
+    "category": "livestock"
+  },
+  {
+    "name": "Krishi Vigyan Kendra (KVK) Training & Advisory",
+    "name_hindi": "कृषि विज्ञान केंद्र प्रशिक्षण योजना",
+    "benefit": "Free hands-on training, demonstrations, and advisory on modern farming techniques, seed varieties, and pest management",
+    "eligibility": "All farmers in the KVK's operational district",
+    "documents": "None required, walk-in service",
+    "how_to_apply": "Visit your nearest Krishi Vigyan Kendra in person or call their helpline",
+    "category": "advisory"
+  },
+  {
+    "name": "Mukhyamantri Krishi Ashirwad Yojana (Jharkhand)",
+    "name_hindi": "मुख्यमंत्री कृषि आशीर्वाद योजना",
+    "benefit": "Rs 5000 per acre per year financial assistance to small and marginal farmers, up to 5 acres",
+    "eligibility": "Small and marginal farmers in Jharkhand with up to 5 acres of land",
+    "documents": "Aadhaar, land records, bank account",
+    "how_to_apply": "Apply through Jharkhand state agriculture department portal or local Krishi office",
+    "category": "income support (state - Jharkhand)"
+  },
+  {
+    "name": "Bhavantar Bhugtan Yojana (Madhya Pradesh)",
+    "name_hindi": "भावांतर भुगतान योजना",
+    "benefit": "Compensates farmers for the difference between MSP (Minimum Support Price) and actual market sale price for notified crops",
+    "eligibility": "Farmers in Madhya Pradesh selling notified crops in registered mandis",
+    "documents": "Land records, mandi sale receipt, bank account",
+    "how_to_apply": "Register crop and sale details at the mandi at time of selling; compensation is auto-calculated",
+    "category": "price support (state - Madhya Pradesh)"
+  },
+  {
+    "name": "Rythu Bandhu Scheme (Telangana)",
+    "name_hindi": "रायथु बंधु योजना",
+    "benefit": "Rs 10,000 per acre per year (Rs 5000 per season) as direct investment support for crop inputs",
+    "eligibility": "All landowning farmers in Telangana",
+    "documents": "Aadhaar, land passbook (Pattadar), bank account",
+    "how_to_apply": "Automatically credited based on land records; verify details at local Agriculture Extension Office",
+    "category": "income support (state - Telangana)"
+  },
+  {
+    "name": "Kalia Yojana (Odisha)",
+    "name_hindi": "कालिया योजना",
+    "benefit": "Rs 4000 per season for cultivation support to small/marginal farmers, plus separate support for landless agricultural laborers",
+    "eligibility": "Small and marginal farmers and landless agricultural households in Odisha",
+    "documents": "Aadhaar, land records (if applicable), bank account",
+    "how_to_apply": "Apply through Gram Panchayat office or Odisha KALIA portal",
+    "category": "income support (state - Odisha)"
+  },
+  {
+    "name": "YSR Rythu Bharosa (Andhra Pradesh)",
+    "name_hindi": "वाईएसआर रायथु भरोसा",
+    "benefit": "Rs 13,500 per year per farmer family as direct financial assistance (includes PM-Kisan component)",
+    "eligibility": "All farmer families in Andhra Pradesh including tenant farmers",
+    "documents": "Aadhaar, land records or tenant farmer certificate, bank account",
+    "how_to_apply": "Apply through village/ward secretariat or AP state agriculture portal",
+    "category": "income support (state - Andhra Pradesh)"
+  },
+  {
+    "name": "Mukhyamantri Kisan Sahay Yojana (Gujarat)",
+    "name_hindi": "मुख्यमंत्री किसान सहाय योजना",
+    "benefit": "Compensation up to Rs 20,000 per hectare for crop loss due to unseasonal rain, flood, or drought (no premium required from farmer)",
+    "eligibility": "All farmers in Gujarat with crop loss of 33% or more",
+    "documents": "Land records, Aadhaar, bank account, crop loss assessment report",
+    "how_to_apply": "Apply through village Talati or Gujarat state agriculture department after loss assessment",
+    "category": "insurance (state - Gujarat)"
+  },
+  {
+    "name": "Mukhyamantri Krishak Durghatna Kalyan Yojana (Madhya Pradesh)",
+    "name_hindi": "मुख्यमंत्री कृषक दुर्घटना कल्याण योजना",
+    "benefit": "Insurance cover up to Rs 4 lakh in case of accidental death or permanent disability of a registered farmer",
+    "eligibility": "All registered farmers in Madhya Pradesh aged 18-70",
+    "documents": "Aadhaar, land records, bank account",
+    "how_to_apply": "Apply through Tehsil office or MP state agriculture department",
+    "category": "insurance (state - Madhya Pradesh)"
+  },
+  {
+    "name": "National Beekeeping & Honey Mission (NBHM)",
+    "name_hindi": "राष्ट्रीय मधुमक्खी पालन एवं शहद मिशन",
+    "benefit": "Subsidy up to 50-80% for beekeeping equipment, bee colonies, and honey processing units to boost farmer income through apiculture",
+    "eligibility": "Farmers and entrepreneurs interested in beekeeping, individual or in groups/FPOs",
+    "documents": "Aadhaar, project proposal, bank account",
+    "how_to_apply": "Apply through National Bee Board or state horticulture department",
+    "category": "apiculture"
+  },
+  {
+    "name": "ITC Mission Sunehra Kal (CSR)",
+    "name_hindi": "आईटीसी मिशन सुनहरा कल",
+    "benefit": "Free training and support in watershed development, soil moisture conservation, livestock services, and farm productivity improvement for rural communities",
+    "eligibility": "Farmers in ITC's operational areas, mainly in agriculture-dependent districts",
+    "documents": "Usually none required, community-based enrollment",
+    "how_to_apply": "Contact local ITC e-Choupal center or CSR program office in your district",
+    "category": "csr - agriculture"
+  },
+  {
+    "name": "Mahindra Krishi Vikas (CSR)",
+    "name_hindi": "महिंद्रा कृषि विकास",
+    "benefit": "Farm mechanization support, water conservation projects, and farmer training programs through Mahindra's rural development initiatives",
+    "eligibility": "Farmers in Mahindra Foundation's operational villages",
+    "documents": "Usually none required, community-based enrollment",
+    "how_to_apply": "Contact K.C. Mahindra Education Trust or local Mahindra Foundation office",
+    "category": "csr - agriculture"
+  },
+  {
+    "name": "PM Formalisation of Micro Food Processing Enterprises (PM-FME)",
+    "name_hindi": "पीएम सूक्ष्म खाद्य प्रसंस्करण उद्यम योजना",
+    "benefit": "Credit-linked subsidy of 35% (up to Rs 10 lakh) for setting up or upgrading micro food processing units, including for farmer-owned value addition",
+    "eligibility": "Individual farmers, FPOs, SHGs, and cooperatives wanting to start food processing units",
+    "documents": "Aadhaar, project report, bank account, land/premises proof",
+    "how_to_apply": "Apply online at pmfme.mofpi.gov.in or through district resource person",
+    "category": "food processing"
+  },
+  {
+    "name": "Sub-Mission on Seed and Planting Material (SMSP)",
+    "name_hindi": "बीज एवं रोपण सामग्री उप-मिशन",
+    "benefit": "Subsidy for quality certified seed production, seed banks, and distribution of high-yielding variety seeds at reduced cost",
+    "eligibility": "Farmers, seed producer organizations, and cooperatives",
+    "documents": "Land records, Aadhaar, bank account",
+    "how_to_apply": "Apply through state seed corporation or district agriculture office",
+    "category": "seeds"
+  },
+  {
+    "name": "National Mission on Natural Farming (NMNF)",
+    "name_hindi": "राष्ट्रीय प्राकृतिक खेती मिशन",
+    "benefit": "Financial assistance and training for adopting zero-budget natural farming practices, reducing input costs",
+    "eligibility": "Farmers willing to transition to natural/chemical-free farming methods",
+    "documents": "Land records, Aadhaar, group enrollment (if applicable)",
+    "how_to_apply": "Contact state agriculture department or local Krishi Vigyan Kendra for cluster enrollment",
+    "category": "natural farming"
+  },
+  {
+    "name": "Agriculture Marketing Infrastructure (AMI) Subsidy",
+    "name_hindi": "कृषि विपणन अवसंरचना सब्सिडी",
+    "benefit": "Capital subsidy of 25-33.33% for building market yards, grading units, and post-harvest handling infrastructure",
+    "eligibility": "Individual farmers, FPOs, cooperatives, and agri-entrepreneurs",
+    "documents": "Project report, land documents, bank account",
+    "how_to_apply": "Apply through NABARD-affiliated banks or state agriculture marketing board",
+    "category": "infrastructure"
+  },
+  {
+    "name": "Pradhan Mantri Awaas Yojana - Gramin (for farmer households)",
+    "name_hindi": "प्रधानमंत्री आवास योजना ग्रामीण",
+    "benefit": "Financial assistance up to Rs 1.30 lakh for constructing a pucca house for rural BPL farmer families",
+    "eligibility": "Rural households, especially landless/marginal farmers below poverty line, as per SECC data",
+    "documents": "Aadhaar, BPL certificate or SECC verification, bank account",
+    "how_to_apply": "Apply through Gram Panchayat or Block Development Office",
+    "category": "housing (rural welfare)"
+  },
+  {
+    "name": "Jal Jeevan Mission (Rural Water for Farm Households)",
+    "name_hindi": "जल जीवन मिशन",
+    "benefit": "Free functional household tap water connection for every rural household, supporting both domestic and small-scale farm use",
+    "eligibility": "All rural households including farmer families",
+    "documents": "Aadhaar, address proof",
+    "how_to_apply": "Contact Gram Panchayat or Public Health Engineering Department (PHED) office",
+    "category": "infrastructure (rural welfare)"
+  },
+  {
+    "name": "Mukhyamantri Tractor Yojana (Various states)",
+    "name_hindi": "मुख्यमंत्री ट्रैक्टर योजना",
+    "benefit": "Subsidy of 20-50% on tractor purchase for small and marginal farmers (scheme name and benefit varies by state - check local version)",
+    "eligibility": "Small and marginal farmers, varies by state implementation",
+    "documents": "Aadhaar, land records, bank account, tractor quotation",
+    "how_to_apply": "Apply through state agriculture mechanization portal or district agriculture office",
+    "category": "equipment (state schemes)"
+  },
+  {
+    "name": "National Programme for Organic Production (NPOP)",
+    "name_hindi": "राष्ट्रीय जैविक उत्पादन कार्यक्रम",
+    "benefit": "Certification support and market linkage assistance for farmers producing organic crops for export and premium domestic markets",
+    "eligibility": "Farmers and farmer groups practicing or transitioning to certified organic farming",
+    "documents": "Land records, farming practice records, group registration (if applicable)",
+    "how_to_apply": "Apply through APEDA (Agricultural and Processed Food Products Export Development Authority) or accredited certification bodies",
+    "category": "organic farming / export"
   }
 ]
