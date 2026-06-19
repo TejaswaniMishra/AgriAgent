@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_advisory(text: str, language: str = "hi") -> str:
+def get_advisory(text: str, language: str = "hi",previous_context: str = "") -> str:
     # Step 1 — Extract crop and location from farmer's message
     extract_prompt = f"""
     The farmer said: "{text}"
@@ -35,6 +35,17 @@ def get_advisory(text: str, language: str = "hi") -> str:
     # Step 3 — Get current month for seasonal context
     current_month = datetime.now().strftime("%B")
     
+    history_note = ""
+    if previous_context:
+        history_note = f"""
+    
+    IMPORTANT CONTEXT — Your previous reply to this farmer was:
+    "{previous_context}"
+    
+    If the farmer's new question refers back to this (e.g. "what about irrigation", 
+    "aur kya karna chahiye", "iske baad kya"), continue naturally from that context.
+    """
+        
     # Step 4 — Generate advisory using LLM with weather + crop + season context
     prompt = f"""
     You are an experienced Indian agricultural advisor.

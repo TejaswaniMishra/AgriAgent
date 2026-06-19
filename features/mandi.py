@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_mandi_prices(text: str, language: str = "hi") -> str:
+def get_mandi_prices(text: str, language: str = "hi",previous_context: str = "") -> str:
     # Step 1 — Extract commodity and location
     extract_prompt = f"""
     The farmer said: "{text}"
@@ -30,6 +30,16 @@ def get_mandi_prices(text: str, language: str = "hi") -> str:
 
     # Step 2 — Try fetching live prices
     prices = fetch_from_data_gov(commodity, district)
+    history_note = ""
+    if previous_context:
+        history_note = f"""
+    
+    IMPORTANT CONTEXT — Your previous reply to this farmer was:
+    "{previous_context}"
+    
+    If the farmer's new question refers back to this (e.g. "what about tomorrow", 
+    "and for rice","and for any other crop", "ispe aur batao"), use the previous reply to understand the context.
+    """
     
     # Step 3 — Format response
     if prices:

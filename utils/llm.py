@@ -26,7 +26,7 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi") -> str
     language_name = language_map.get(language, "Hindi")
     
     # Append language instruction to every prompt
-    full_prompt = prompt + f"\n\nIMPORTANT: Reply ONLY in {language_name}. Do not use any other language."
+    full_prompt = prompt + f"\n\nIMPORTANT: Reply ONLY in {language_name}. Do not use any other language. Use only real,correct words - do not invent or make up words. If unsure of any term, use simpler evryday word of that language instead "
     
     try:
         if image_path:
@@ -51,7 +51,7 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi") -> str
             )
         else:
             response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": full_prompt}],
                 max_tokens=1000
             )

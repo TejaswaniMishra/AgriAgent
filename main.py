@@ -67,45 +67,75 @@ def get_confirmation_message(language: str) -> str:
 def detect_language_change_command(text: str) -> str | None:
     """Use LLM to detect if farmer wants to change language"""
     prompt = f"""
-    A farmer said: "{text}"
-    Is the farmer requesting to change the response language?
-    If YES, reply with ONLY the 2-letter ISO 639-1 code of the requested language.
+    A farmer said exactly this: "{text}"
+    
+    Is this farmer EXPLICITLY asking to change/switch the response language?
+    Only say YES if they clearly request a language change, like:
+    "Give response in Kannada", "Hindi mein btao", "switch to Tamil", "reply in English"
+    
+    Say NO for everything else, including:
+    - Greetings like "hi", "hello", "namaste"
+    - Questions about crops, schemes, weather, prices
+    - Any normal farming-related question
+    - Short messages that aren't clearly a language request
+    
+    If YES, reply with ONLY the 2-letter ISO 639-1 code of the requested language (e.g. kn, hi, ta, en).
     If NO, reply with ONLY the word: NO
     
     Examples:
     "Give response in Kannada" → kn
     "Hindi mein btao" → hi
-    "Tamil mein bolo" → ta
+    "hi" → NO
+    "hello" → NO
+    "mujhe sinchai ki yojana chahiye" → NO
+    "tell me irrigation schemes for farmers" → NO
     "aaj gehu ka bhav kya hai" → NO
     "respond in odia" → or
-    "ಕನ್ನಡದಲ್ಲಿ ಹೇಳಿ" → kn
-    "what is wheat price" → NO
     """
     try:
         result = ask_llm(prompt).strip().lower()
-        if result == "no":
+        # Clean — remove any punctuation/extra text
+        result = result.replace(".", "").replace(",", "").strip()
+        
+        if result == "no" or "no" in result[:3]:
             return None
-        # Clean result — sometimes LLM adds extra text
-        result = result[:2]
-        return result if len(result) == 2 and result.isalpha() else None
+        
+        # Extract just first 2 alphabetic characters
+        result = "".join(c for c in result if c.isalpha())[:2]
+        
+        valid_codes = {"hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "or", "ur"}
+        return result if result in valid_codes else None
     except:
         return None
-
-
+    
 def detect_language_from_text(text: str) -> str:
     """Use LLM to detect language of typed text"""
     prompt = f"""
-    What language is this text written in: "{text}"
+    Identify the PRIMARY language this text is written in: "{text}"
+    
+    Important: Judge by the SCRIPT and GRAMMAR structure, not individual proper nouns or place names.
+    For example, "What are wheat prices in Gorakhpur mandi today" is ENGLISH (en) — 
+    even though "mandi" and "Gorakhpur" are Hindi/Indian words, the sentence structure 
+    and majority of words are English.
+    
+    Only classify as Hindi (hi) if the text is actually written in Hindi grammar/words 
+    (Devanagari script OR Romanized Hindi like "aaj gehu ka bhav kya hai").
+    
     Reply with ONLY the 2-letter ISO 639-1 code.
-    Examples: Hindi=hi, English=en, Kannada=kn, Tamil=ta,
-    Telugu=te, Bengali=bn, Gujarati=gu, Malayalam=ml,
-    Punjabi=pa, Odia=or, Marathi=mr, Urdu=ur
+    Examples: 
+    "What are wheat prices in Gorakhpur mandi today" → en
+    "aaj gehu ka bhav kya hai" → hi
+    "गेहूं का भाव क्या है" → hi
+    "tell me farming schemes" → en
     Bhojpuri/Awadhi/Maithili → hi
+    
     Reply ONLY the 2-letter code, nothing else.
     """
     try:
-        result = ask_llm(prompt).strip().lower()[:2]
-        return result if len(result) == 2 and result.isalpha() else "hi"
+        result = ask_llm(prompt).strip().lower()
+        result = "".join(c for c in result if c.isalpha())[:2]
+        valid_codes = {"hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "or", "ur"}
+        return result if result in valid_codes else "hi"
     except:
         return "hi"
 
@@ -190,32 +220,37 @@ async def whatsapp_webhook(
 
     # --- ROUTE TO FEATURE ---
     intent = detect_intent(transcribed_text)
-    reply = await route_intent(intent, transcribed_text, detected_language)
+    reply = await route_intent(intent, transcribed_text, detected_language,farmer_number)
     await send_reply(farmer_number, reply, detected_language)
 
     return {"status": "ok"}
 
 
-async def route_intent(intent: str, text: str, language: str = "hi") -> str:
+async def route_intent(intent: str, text: str, language: str = "hi", farmer_number: str = "") -> str:
+    previous_context = user_conversation_history.get(farmer_number, "")
+    
     if intent == "mandi":
         from features.mandi import get_mandi_prices
-        return get_mandi_prices(text, language)
+        return get_mandi_prices(text, language, previous_context)
     elif intent == "scheme":
         from features.schemes import get_schemes
-        return get_schemes(text, language)
+        return get_schemes(text, language, previous_context)
     elif intent == "advisory":
         from features.advisory import get_advisory
-        return get_advisory(text, language)
+        return get_advisory(text, language, previous_context)
     else:
         from utils.llm import ask_gemini
-        return ask_gemini(
-            f'The farmer said: "{text}". Reply helpfully as an Indian agricultural assistant in 2-3 sentences.',
-            language=language
-        )
+        prompt = f'The farmer said: "{text}".'
+        if previous_context:
+            prompt = f'Previous conversation: "{previous_context}"\n\nFarmer now said: "{text}". If this refers to the previous conversation, use that context.'
+        return ask_gemini(prompt + " Reply helpfully as an Indian agricultural assistant in 2-3 sentences.", language=language)
 
 
 async def send_reply(farmer_number: str, text: str, language: str = "hi"):
     """Send both voice note and text to farmer"""
+    # Save this response as context for potential follow-up questions
+    user_conversation_history[farmer_number] = text
+    
     audio_path = text_to_voice(text, language)
     if audio_path and PUBLIC_URL:
         filename = os.path.basename(audio_path)
@@ -225,7 +260,6 @@ async def send_reply(farmer_number: str, text: str, language: str = "hi"):
     else:
         print("Audio failed — sending text only")
         send_text(farmer_number, text)
-
 
 async def download_media(url: str, ext: str) -> str:
     """Download media from Twilio"""
