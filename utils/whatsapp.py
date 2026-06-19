@@ -19,16 +19,16 @@ def send_text(to: str, message: str):
         print(f"Text send error: {e}")
 
 def send_voice(to: str, audio_url: str, message: str):
-    """Send voice note + text to farmer"""
     try:
-        # Send voice note
+        print(f"Sending voice to {to}")
+        print(f"Audio URL: {audio_url}")
         client.messages.create(
             from_=TWILIO_NUMBER,
             to=to,
             media_url=[audio_url],
             body=""
         )
-        # Send text as well
         send_text(to, message)
+        print("✅ Voice sent successfully")
     except Exception as e:
-        print(f"Voice send error: {e}")
+        print(f"VOICE SEND ERROR: {e}")

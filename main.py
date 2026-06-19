@@ -19,39 +19,57 @@ PUBLIC_URL = os.getenv("PUBLIC_URL", "")
 
 # Session memory — farmer number -> language
 user_language_cache = {}
+user_conversation_history = {}
+
+def ask_llm(prompt: str) -> str:
+    from utils.llm import ask_gemini
+    return ask_gemini(prompt)
 
 
-LANGUAGE_NAMES = {
-    "hi": {"hi": "हिंदी", "en": "Hindi", "kn": "ಹಿಂದಿ", "ta": "இந்தி", "te": "హిందీ", "bn": "হিন্দি", "gu": "હિન્દી", "ml": "ഹിന്ദി"},
-    "en": {"hi": "अंग्रेजी", "en": "English", "kn": "ಇಂಗ್ಲಿಷ್", "ta": "ஆங்கிலம்", "te": "ఇంగ్లీష్", "bn": "ইংরেজি", "gu": "અંગ્રેજી", "ml": "ഇംഗ്ലീഷ്"},
-    "kn": {"hi": "कन्नड़", "en": "Kannada", "kn": "ಕನ್ನಡ", "ta": "கன்னடம்", "te": "కన్నడ", "bn": "কন্নড়", "gu": "કન્નડ", "ml": "കന്നഡ"},
-    "ta": {"hi": "तमिल", "en": "Tamil", "kn": "ತಮಿಳು", "ta": "தமிழ்", "te": "తమిళం", "bn": "তামিল", "gu": "તમિળ", "ml": "തമിഴ്"},
-    "te": {"hi": "तेलुगु", "en": "Telugu", "kn": "ತೆಲುಗು", "ta": "తెలుగు", "te": "తెలుగు", "bn": "তেলুগু", "gu": "તેલુગુ", "ml": "തെലുങ്ക്"},
-    "bn": {"hi": "बंगाली", "en": "Bengali", "kn": "ಬೆಂಗಾಳಿ", "ta": "வங்காளம்", "te": "బెంగాలీ", "bn": "বাংলা", "gu": "બંગાળી", "ml": "ബംഗാളി"},
-    "mr": {"hi": "मराठी", "en": "Marathi", "kn": "ಮರಾಠಿ", "ta": "மராத்தி", "te": "మరాఠీ", "bn": "মারাঠি", "gu": "મરાઠી", "ml": "മറാത്തി"},
-    "gu": {"hi": "गुजराती", "en": "Gujarati", "kn": "ಗುಜರಾತಿ", "ta": "குஜராத்தி", "te": "గుజరాతీ", "bn": "গুজরাটি", "gu": "ગુજરાતી", "ml": "ഗുജറാത്തി"},
-    "ml": {"hi": "मलयालम", "en": "Malayalam", "kn": "ಮಲಯಾಳಂ", "ta": "மலையாளம்", "te": "మలయాళం", "bn": "মালায়ালাম", "gu": "મલયાલમ", "ml": "മലയാളം"},
-    "pa": {"hi": "पंजाबी", "en": "Punjabi", "kn": "ಪಂಜಾಬಿ", "ta": "பஞ்சாபி", "te": "పంజాబీ", "bn": "পাঞ্জাবি", "gu": "પંજાબી", "ml": "പഞ്ചാബി"},
-}
+def get_system_message(message_type: str, language: str) -> str:
+    """Generate any system message in target language using LLM"""
+    messages = {
+        "listening": "Tell the user you are listening to their voice message. Very short, 1 sentence.",
+        "sorry": "Tell the user you could not understand and to please try again. Very short, 1 sentence.",
+        "analyzing": "Tell the user you are analyzing their crop photo. Very short, 1 sentence.",
+    }
+    prompt = f"""
+    Generate this message in the language with ISO code "{language}":
+    "{messages.get(message_type, message_type)}"
+    Add a relevant emoji at the start.
+    Reply with ONLY the message, nothing else.
+    """
+    try:
+        return ask_llm(prompt)
+    except:
+        defaults = {
+            "listening": "🎤 Listening...",
+            "sorry": "Sorry, please try again.",
+            "analyzing": "📸 Analyzing photo..."
+        }
+        return defaults.get(message_type, "Please wait...")
+
 
 def get_confirmation_message(language: str) -> str:
+    """Generate language change confirmation in target language"""
     prompt = f"""
-    Generate a short confirmation message in the language with code "{language}".
+    Generate a short confirmation message in the language with ISO code "{language}".
     The message should say: "Language changed successfully. How can I help you?"
     Add a ✅ emoji at the start.
     Reply with ONLY the message, nothing else.
     """
     try:
-        from utils.llm import ask_gemini
-        return ask_gemini(prompt)
+        return ask_llm(prompt)
     except:
         return "✅ Language changed. How can I help you?"
 
+
 def detect_language_change_command(text: str) -> str | None:
+    """Use LLM to detect if farmer wants to change language"""
     prompt = f"""
     A farmer said: "{text}"
     Is the farmer requesting to change the response language?
-    If YES, reply with ONLY the 2-letter ISO 639-1 code of requested language.
+    If YES, reply with ONLY the 2-letter ISO 639-1 code of the requested language.
     If NO, reply with ONLY the word: NO
     
     Examples:
@@ -61,34 +79,36 @@ def detect_language_change_command(text: str) -> str | None:
     "aaj gehu ka bhav kya hai" → NO
     "respond in odia" → or
     "ಕನ್ನಡದಲ್ಲಿ ಹೇಳಿ" → kn
+    "what is wheat price" → NO
     """
     try:
-        from utils.llm import ask_gemini
-        result = ask_gemini(prompt).strip().lower()
+        result = ask_llm(prompt).strip().lower()
         if result == "no":
             return None
-        if len(result) == 2:
-            return result
-        return None
+        # Clean result — sometimes LLM adds extra text
+        result = result[:2]
+        return result if len(result) == 2 and result.isalpha() else None
     except:
         return None
 
+
 def detect_language_from_text(text: str) -> str:
+    """Use LLM to detect language of typed text"""
     prompt = f"""
     What language is this text written in: "{text}"
     Reply with ONLY the 2-letter ISO 639-1 code.
     Examples: Hindi=hi, English=en, Kannada=kn, Tamil=ta,
     Telugu=te, Bengali=bn, Gujarati=gu, Malayalam=ml,
-    Punjabi=pa, Odia=or, Marathi=mr
-    Bhojpuri/Awadhi → hi
+    Punjabi=pa, Odia=or, Marathi=mr, Urdu=ur
+    Bhojpuri/Awadhi/Maithili → hi
     Reply ONLY the 2-letter code, nothing else.
     """
     try:
-        from utils.llm import ask_gemini
-        result = ask_gemini(prompt).strip().lower()[:2]
-        return result if len(result) == 2 else "hi"
+        result = ask_llm(prompt).strip().lower()[:2]
+        return result if len(result) == 2 and result.isalpha() else "hi"
     except:
         return "hi"
+
 
 @app.get("/")
 def root():
@@ -107,84 +127,68 @@ async def whatsapp_webhook(
     farmer_number = From
     has_media = int(NumMedia) > 0
 
-    # Get farmer's last known language, default Hindi
     current_language = user_language_cache.get(farmer_number, "hi")
     transcribed_text = ""
     detected_language = current_language
 
+    # --- VOICE NOTE ---
     if has_media and MediaContentType0 and "audio" in MediaContentType0:
-        send_text(farmer_number, "🎤 Listening...")
+        send_text(farmer_number, get_system_message("listening", current_language))
         audio_path = await download_media(MediaUrl0, "mp3")
         transcribed_text, detected_language = transcribe_audio(audio_path)
 
-        # Check if farmer is requesting language change via voice
         lang_change = detect_language_change_command(transcribed_text)
         if lang_change:
             detected_language = lang_change
             user_language_cache[farmer_number] = detected_language
-            lang_names = {
-                "hi": "Hindi", "en": "English", "kn": "Kannada",
-                "ta": "Tamil", "te": "Telugu", "bn": "Bengali",
-                "mr": "Marathi", "gu": "Gujarati", "ml": "Malayalam"
-            }
-            confirm_msg = get_confirmation_message(detected_language)  
+            confirm_msg = get_confirmation_message(detected_language)
             await send_reply(farmer_number, confirm_msg, detected_language)
             return {"status": "ok"}
         else:
-            # Auto update language based on what farmer spoke
             user_language_cache[farmer_number] = detected_language
 
+    # --- IMAGE ---
     elif has_media and MediaContentType0 and "image" in MediaContentType0:
-        # Check if caption has language command
         caption = Body.strip() if Body else ""
-        
+
         if caption:
             lang_change = detect_language_change_command(caption)
             if lang_change:
                 detected_language = lang_change
                 user_language_cache[farmer_number] = detected_language
             else:
-                detected_language = user_language_cache.get(farmer_number, "hi")
+                detected_language = current_language
         else:
-            detected_language = user_language_cache.get(farmer_number, "hi")
-        
-        send_text(farmer_number, "📸 Analyzing your crop photo...")
+            detected_language = current_language
+
+        send_text(farmer_number, get_system_message("analyzing", detected_language))
         image_path = await download_media(MediaUrl0, "jpg")
         from features.pest import analyze_pest
         reply = analyze_pest(image_path, detected_language)
         await send_reply(farmer_number, reply, detected_language)
         return {"status": "ok"}
 
+    # --- TEXT MESSAGE ---
     else:
         transcribed_text = Body
 
-        # Check if farmer is requesting language change via text
         lang_change = detect_language_change_command(transcribed_text)
         if lang_change:
             detected_language = lang_change
             user_language_cache[farmer_number] = detected_language
-            lang_names = {
-                "hi": "Hindi", "en": "English", "kn": "Kannada",
-                "ta": "Tamil", "te": "Telugu", "bn": "Bengali",
-                "mr": "Marathi", "gu": "Gujarati", "ml": "Malayalam"
-            }
             confirm_msg = get_confirmation_message(detected_language)
             await send_reply(farmer_number, confirm_msg, detected_language)
             return {"status": "ok"}
 
-        # Auto detect from script
-        script_lang = detect_language_from_text(transcribed_text)
-        if script_lang != "en":
-            detected_language = script_lang
-        else:
-            detected_language = current_language
-
+        detected_language = detect_language_from_text(transcribed_text)
         user_language_cache[farmer_number] = detected_language
 
+    # --- EMPTY MESSAGE CHECK ---
     if not transcribed_text.strip():
-        send_text(farmer_number, "Sorry, I could not understand. Please try again.")
+        send_text(farmer_number, get_system_message("sorry", current_language))
         return {"status": "ok"}
 
+    # --- ROUTE TO FEATURE ---
     intent = detect_intent(transcribed_text)
     reply = await route_intent(intent, transcribed_text, detected_language)
     await send_reply(farmer_number, reply, detected_language)
@@ -205,22 +209,26 @@ async def route_intent(intent: str, text: str, language: str = "hi") -> str:
     else:
         from utils.llm import ask_gemini
         return ask_gemini(
-            f'The farmer said: "{text}". Reply helpfully as an agricultural assistant in 2-3 sentences.',
+            f'The farmer said: "{text}". Reply helpfully as an Indian agricultural assistant in 2-3 sentences.',
             language=language
         )
 
 
 async def send_reply(farmer_number: str, text: str, language: str = "hi"):
+    """Send both voice note and text to farmer"""
     audio_path = text_to_voice(text, language)
     if audio_path and PUBLIC_URL:
         filename = os.path.basename(audio_path)
         audio_url = f"{PUBLIC_URL}/temp/{filename}"
+        print(f"Sending voice: {audio_url}")
         send_voice(farmer_number, audio_url, text)
     else:
+        print("Audio failed — sending text only")
         send_text(farmer_number, text)
 
 
 async def download_media(url: str, ext: str) -> str:
+    """Download media from Twilio"""
     import uuid
     os.makedirs("temp", exist_ok=True)
     filepath = f"temp/{uuid.uuid4().hex}.{ext}"
@@ -235,6 +243,7 @@ async def download_media(url: str, ext: str) -> str:
             follow_redirects=True,
             timeout=30.0
         )
+        print(f"Media download: {response.status_code} | {len(response.content)} bytes")
         with open(filepath, "wb") as f:
             f.write(response.content)
 

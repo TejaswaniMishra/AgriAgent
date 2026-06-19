@@ -1,0 +1,227 @@
+[
+  {
+    "name": "PM-Kisan Samman Nidhi",
+    "name_hindi": "प्रधानमंत्री किसान सम्मान निधि",
+    "benefit": "Rs 6000 per year in 3 installments of Rs 2000 each, directly transferred to bank account",
+    "eligibility": "All landholding farmer families with cultivable land",
+    "documents": "Aadhaar card, land records, bank account",
+    "how_to_apply": "Apply online at pmkisan.gov.in or visit nearest Common Service Center (CSC)",
+    "category": "income support"
+  },
+  {
+    "name": "Kisan Credit Card (KCC)",
+    "name_hindi": "किसान क्रेडिट कार्ड",
+    "benefit": "Short-term credit up to Rs 3 lakh at 4% interest rate for crop cultivation, also covers post-harvest expenses",
+    "eligibility": "All farmers including tenant farmers, sharecroppers, and oral lessees",
+    "documents": "Aadhaar, land documents or lease agreement, passport size photo",
+    "how_to_apply": "Apply at any nearby bank branch (nationalized, cooperative, or rural bank)",
+    "category": "credit"
+  },
+  {
+    "name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "name_hindi": "प्रधानमंत्री फसल बीमा योजना",
+    "benefit": "Crop insurance covering losses due to natural calamities, pests, diseases. Premium is only 2% for Kharif, 1.5% for Rabi crops",
+    "eligibility": "All farmers growing notified crops in notified areas",
+    "documents": "Aadhaar, land records, bank account, sowing certificate",
+    "how_to_apply": "Apply through banks, CSCs, or online at pmfby.gov.in before the cutoff date for each season",
+    "category": "insurance"
+  },
+  {
+    "name": "Soil Health Card Scheme",
+    "name_hindi": "मृदा स्वास्थ्य कार्ड योजना",
+    "benefit": "Free soil testing every 2 years with fertilizer recommendations to improve productivity",
+    "eligibility": "All farmers",
+    "documents": "Land records, Aadhaar",
+    "how_to_apply": "Contact local Krishi Vigyan Kendra (KVK) or agriculture department office",
+    "category": "advisory"
+  },
+  {
+    "name": "PM Krishi Sinchayee Yojana (PMKSY)",
+    "name_hindi": "प्रधानमंत्री कृषि सिंचाई योजना",
+    "benefit": "Subsidy up to 55% for drip/sprinkler irrigation systems to improve water use efficiency",
+    "eligibility": "All farmers, with higher subsidy for small and marginal farmers",
+    "documents": "Land records, Aadhaar, bank account",
+    "how_to_apply": "Apply through state agriculture department or horticulture department",
+    "category": "irrigation"
+  },
+  {
+    "name": "National Agriculture Market (e-NAM)",
+    "name_hindi": "राष्ट्रीय कृषि बाजार",
+    "benefit": "Online trading platform connecting farmers to buyers across India for better price discovery",
+    "eligibility": "All farmers registered with local mandi",
+    "documents": "Aadhaar, bank account, mandi registration",
+    "how_to_apply": "Register at your nearest e-NAM linked mandi or online at enam.gov.in",
+    "category": "marketing"
+  },
+  {
+    "name": "Rashtriya Krishi Vikas Yojana (RKVY)",
+    "name_hindi": "राष्ट्रीय कृषि विकास योजना",
+    "benefit": "State-specific funding support for agriculture infrastructure, equipment subsidy, and farmer training",
+    "eligibility": "Varies by state scheme component",
+    "documents": "Varies by state",
+    "how_to_apply": "Contact state agriculture department",
+    "category": "infrastructure"
+  },
+  {
+    "name": "Pradhan Mantri Kisan Maandhan Yojana",
+    "name_hindi": "प्रधानमंत्री किसान मानधन योजना",
+    "benefit": "Pension of Rs 3000 per month after age 60 for small and marginal farmers",
+    "eligibility": "Small and marginal farmers aged 18-40 years with up to 2 hectares land",
+    "documents": "Aadhaar, bank account, land records, age proof",
+    "how_to_apply": "Apply at nearest CSC or online at maandhan.in",
+    "category": "pension"
+  },
+  {
+    "name": "Agriculture Infrastructure Fund (AIF)",
+    "name_hindi": "कृषि अवसंरचना कोष",
+    "benefit": "Loan up to Rs 2 crore at 3% interest subvention for building storage, cold chains, processing units",
+    "eligibility": "Farmers, FPOs, agri-entrepreneurs, cooperatives",
+    "documents": "Project proposal, land documents, bank account",
+    "how_to_apply": "Apply through participating banks or online at agriinfra.dac.gov.in",
+    "category": "infrastructure"
+  },
+  {
+    "name": "Paramparagat Krishi Vikas Yojana (PKVY)",
+    "name_hindi": "परम्परागत कृषि विकास योजना",
+    "benefit": "Financial assistance of Rs 50,000 per hectare over 3 years for organic farming adoption",
+    "eligibility": "Farmer groups willing to adopt organic farming practices",
+    "documents": "Land records, group formation documents, Aadhaar",
+    "how_to_apply": "Contact state agriculture department or KVK for cluster formation",
+    "category": "organic farming"
+  },
+  {
+    "name": "National Livestock Mission",
+    "name_hindi": "राष्ट्रीय पशुधन मिशन",
+    "benefit": "Subsidy for poultry, sheep, goat, and piggery farming entrepreneurship up to 50% of project cost",
+    "eligibility": "Individual farmers, FPOs, SHGs, cooperatives engaged in livestock rearing",
+    "documents": "Project report, Aadhaar, bank account, land/shed documents",
+    "how_to_apply": "Apply through state Animal Husbandry Department or online at nlm.udyamimitra.in",
+    "category": "livestock"
+  },
+  {
+    "name": "Pradhan Mantri Matsya Sampada Yojana (PMMSY)",
+    "name_hindi": "प्रधानमंत्री मत्स्य सम्पदा योजना",
+    "benefit": "Financial support for fish farming, hatcheries, and fisheries infrastructure, subsidy up to 40-60%",
+    "eligibility": "Fish farmers, fishermen, fisheries cooperatives, entrepreneurs",
+    "documents": "Aadhaar, land/water body documents, bank account, project proposal",
+    "how_to_apply": "Apply through state Fisheries Department or district fisheries office",
+    "category": "fisheries"
+  },
+  {
+    "name": "Mahila Kisan Sashaktikaran Pariyojana (MKSP)",
+    "name_hindi": "महिला किसान सशक्तिकरण परियोजना",
+    "benefit": "Training, capacity building and resources for women farmers to improve agricultural productivity and income",
+    "eligibility": "Women farmers, especially those in self-help groups (SHGs)",
+    "documents": "Aadhaar, SHG membership proof",
+    "how_to_apply": "Contact local SHG federation or Rural Livelihood Mission office",
+    "category": "women farmers"
+  },
+  {
+    "name": "Sub-Mission on Agricultural Mechanization (SMAM)",
+    "name_hindi": "कृषि यंत्रीकरण उप-मिशन",
+    "benefit": "Subsidy of 40-50% on purchase of tractors, tillers, harvesters and other farm equipment",
+    "eligibility": "All farmers, higher subsidy for SC/ST, women, and small/marginal farmers",
+    "documents": "Aadhaar, land records, bank account, quotation of equipment",
+    "how_to_apply": "Apply online through state agriculture mechanization portal or at CSC",
+    "category": "equipment"
+  },
+  {
+    "name": "National Food Security Mission (NFSM)",
+    "name_hindi": "राष्ट्रीय खाद्य सुरक्षा मिशन",
+    "benefit": "Assistance for seeds, farm machinery, and training to increase production of rice, wheat, pulses, and coarse cereals",
+    "eligibility": "Farmers growing notified crops in identified districts",
+    "documents": "Land records, Aadhaar, bank account",
+    "how_to_apply": "Contact district agriculture office or block-level extension officer",
+    "category": "crop production"
+  },
+  {
+    "name": "Interest Subvention Scheme for short term crop loans",
+    "name_hindi": "अल्पकालिक फसल ऋण ब्याज सहायता योजना",
+    "benefit": "2% interest subvention plus additional 3% for prompt repayment, effectively bringing crop loan interest to 4%",
+    "eligibility": "Farmers availing crop loans up to Rs 3 lakh through KCC",
+    "documents": "KCC account, Aadhaar, bank account",
+    "how_to_apply": "Automatically applied when repaying KCC loan on time at the bank",
+    "category": "credit"
+  },
+  {
+    "name": "Rural Godown Scheme / Warehouse Infrastructure",
+    "name_hindi": "ग्रामीण भंडारण योजना",
+    "benefit": "Subsidy of 25-33% for constructing rural godowns/warehouses to reduce post-harvest losses",
+    "eligibility": "Individual farmers, FPOs, cooperatives, agri-entrepreneurs",
+    "documents": "Land documents, project proposal, bank account",
+    "how_to_apply": "Apply through NABARD or state agriculture marketing board",
+    "category": "infrastructure"
+  },
+  {
+    "name": "Formation and Promotion of Farmer Producer Organizations (FPO)",
+    "name_hindi": "कृषक उत्पादक संगठन योजना",
+    "benefit": "Financial support up to Rs 18 lakh over 3 years for forming and running farmer collectives for better bargaining power",
+    "eligibility": "Group of minimum 11 farmers (plains) or 7 farmers (hilly/NE areas)",
+    "documents": "Group registration, member list, Aadhaar of members",
+    "how_to_apply": "Contact Cluster Based Business Organization (CBBO) or NABARD regional office",
+    "category": "farmer collectives"
+  },
+  {
+    "name": "Pradhan Mantri Kisan Urja Suraksha evam Utthaan Mahabhiyan (PM-KUSUM)",
+    "name_hindi": "पीएम कुसुम योजना",
+    "benefit": "Subsidy up to 60% for installing solar pumps and solar power plants on farmland, reduces electricity cost and gives extra income",
+    "eligibility": "Individual farmers, cooperatives, panchayats with access to land/barren land",
+    "documents": "Land records, Aadhaar, bank account, electricity connection details",
+    "how_to_apply": "Apply through state renewable energy department or pmkusum.mnre.gov.in",
+    "category": "solar/renewable"
+  },
+  {
+    "name": "National Mission on Edible Oils - Oil Palm (NMEO-OP)",
+    "name_hindi": "राष्ट्रीय खाद्य तेल मिशन",
+    "benefit": "Financial assistance for oil palm cultivation including planting material subsidy and maintenance support for 4 years",
+    "eligibility": "Farmers in notified oil palm growing states/districts",
+    "documents": "Land records, Aadhaar, bank account",
+    "how_to_apply": "Contact state horticulture department or district agriculture office",
+    "category": "crop production"
+  },
+  {
+    "name": "Gramin Bhandaran Yojana (Rural Storage)",
+    "name_hindi": "ग्रामीण भंडारण योजना",
+    "benefit": "Capital subsidy for setting up scientific storage to avoid distress sale and reduce wastage",
+    "eligibility": "Farmers, FPOs, individual entrepreneurs, cooperatives",
+    "documents": "Land/lease documents, project report, bank account",
+    "how_to_apply": "Apply through NABARD-empanelled banks",
+    "category": "infrastructure"
+  },
+  {
+    "name": "Dairy Entrepreneurship Development Scheme (DEDS)",
+    "name_hindi": "डेयरी उद्यमिता विकास योजना",
+    "benefit": "Subsidy up to 25-33% for setting up dairy units, milking machines, and milk processing equipment",
+    "eligibility": "Farmers, individuals, SHGs, NGOs interested in dairy farming",
+    "documents": "Project report, Aadhaar, bank account, land/shed proof",
+    "how_to_apply": "Apply through NABARD or nearby commercial/cooperative bank",
+    "category": "livestock"
+  },
+  {
+    "name": "UP Bhulekh / Land Record Digitization (State Scheme - UP)",
+    "name_hindi": "उत्तर प्रदेश भूलेख योजना",
+    "benefit": "Free digital access to land records (khatauni, khasra) needed for applying to most farmer schemes",
+    "eligibility": "All landowning farmers in Uttar Pradesh",
+    "documents": "Aadhaar, old land record/khatauni number",
+    "how_to_apply": "Visit upbhulekh.gov.in or nearest Lekhpal/Tehsil office",
+    "category": "documentation"
+  },
+  {
+    "name": "UP Kisan Durghatna Bima Yojana (State Scheme - UP)",
+    "name_hindi": "उत्तर प्रदेश किसान दुर्घटना बीमा योजना",
+    "benefit": "Insurance cover up to Rs 5 lakh in case of accidental death or disability of a farmer",
+    "eligibility": "All registered farmers in Uttar Pradesh aged 18-70 years",
+    "documents": "Aadhaar, land records, bank account, accident proof (if claiming)",
+    "how_to_apply": "Apply through Tehsil office or UP agriculture department portal",
+    "category": "insurance"
+  },
+  {
+    "name": "Micro Irrigation Fund (MIF)",
+    "name_hindi": "सूक्ष्म सिंचाई कोष",
+    "benefit": "Low-interest loans to states to expand drip and sprinkler irrigation coverage, indirectly subsidizing farmer adoption",
+    "eligibility": "Farmers benefiting through state-implemented micro-irrigation projects",
+    "documents": "Land records, Aadhaar, bank account",
+    "how_to_apply": "Apply through state horticulture/agriculture department implementing MIF projects",
+    "category": "irrigation"
+  }
+]
