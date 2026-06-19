@@ -8,7 +8,7 @@ os.environ["PATH"] += r";C:\Users\tejas\AppData\Local\Microsoft\WinGet\Packages\
 
 # Load model with error handling
 try:
-    whisper_model = whisper.load_model("base")
+    whisper_model = whisper.load_model("small")
     print("✅ Whisper model loaded successfully")
 except Exception as e:
     print(f"❌ Whisper load failed: {e}")
