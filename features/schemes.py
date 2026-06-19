@@ -13,13 +13,13 @@ def load_schemes():
         return []
 
 
-def get_schemes(text: str, language: str = "hi", previous_context: str = "") -> str:
+def get_schemes(text: str, language: str = "hi", previous_context: str = "", script: str = "native") -> str:
     schemes = load_schemes()
     
     if not schemes:
         return ask_gemini(
             f'A farmer asked about government schemes: "{text}". Give general info about PM-Kisan, KCC, PMFBY schemes.',
-            language=language
+            language=language, script=script
         )
     
     schemes_context = ""
@@ -63,4 +63,4 @@ Category: {s['category']}
     Keep it practical and actionable. Maximum 5-6 sentences total.
     """
     
-    return ask_gemini(prompt, language=language)
+    return ask_gemini(prompt, language=language, script=script)

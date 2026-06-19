@@ -1,7 +1,7 @@
 import os
 from utils.llm import ask_gemini
 
-def analyze_pest(image_path: str, language: str = "hi") -> str:
+def analyze_pest(image_path: str, language: str = "hi", script: str = "native") -> str:
     prompt = """
     You are an expert Indian agricultural scientist with 20 years of experience.
     
@@ -18,11 +18,10 @@ def analyze_pest(image_path: str, language: str = "hi") -> str:
     6. URGENCY: Should the farmer act today, this week, or this month?
     
     IMPORTANT RULES:
-    - Reply ONLY in simple Hindi (not English)
     - Use simple words a rural farmer can understand
     - Keep total response under 150 words
     - Be specific and practical, not generic
-    - If the image is not a crop/plant, politely say so in Hindi
+    - If the image is not a crop/plant, politely say so
     """
     
-    return ask_gemini(prompt, image_path=image_path,language=language)
+    return ask_gemini(prompt, image_path=image_path, language=language, script=script)

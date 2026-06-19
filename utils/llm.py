@@ -7,7 +7,7 @@ load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def ask_gemini(prompt: str, image_path: str = None, language: str = "hi") -> str:
+def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script: str = "native") -> str:
     
     language_map = {
         "hi": "Hindi",
@@ -25,8 +25,14 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi") -> str
     
     language_name = language_map.get(language, "Hindi")
     
+    # Script instruction — decides Devanagari/native script vs Roman/Hinglish
+    if script == "roman" and language != "en":
+        script_instruction = f"Reply in {language_name}, but write it using ROMAN/ENGLISH alphabet only (Hinglish style, like 'aapka sawaal' not 'आपका सवाल'). Do NOT use native script."
+    else:
+        script_instruction = f"Reply ONLY in {language_name}, using its native script."
+    
     # Append language instruction to every prompt
-    full_prompt = prompt + f"\n\nIMPORTANT: Reply ONLY in {language_name}. Do not use any other language. Use only real,correct words - do not invent or make up words. If unsure of any term, use simpler evryday word of that language instead "
+    full_prompt = prompt + f"\n\nIMPORTANT: {script_instruction} Do not use any other language. Use only real, correct words - do not invent or make up words. If unsure of any term, use simpler everyday word of that language instead "
     
     try:
         if image_path:

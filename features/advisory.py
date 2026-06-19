@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_advisory(text: str, language: str = "hi",previous_context: str = "") -> str:
+def get_advisory(text: str, language: str = "hi", previous_context: str = "", script: str = "native") -> str:
     # Step 1 — Extract crop and location from farmer's message
     extract_prompt = f"""
     The farmer said: "{text}"
@@ -55,6 +55,7 @@ def get_advisory(text: str, language: str = "hi",previous_context: str = "") -> 
     Location: {district}, India
     Current month: {current_month}
     Current weather: {weather_info}
+    {history_note}
     
     Give practical crop advisory considering:
     1) Current weather conditions (irrigation needed or not, disease risk from humidity/rain)
@@ -64,7 +65,7 @@ def get_advisory(text: str, language: str = "hi",previous_context: str = "") -> 
     Keep it practical and specific to Indian farming conditions. 4-5 sentences maximum.
     """
     
-    return ask_gemini(prompt, language=language)
+    return ask_gemini(prompt, language=language, script=script)
 
 
 def get_weather(district: str) -> str:

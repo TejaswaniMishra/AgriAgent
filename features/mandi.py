@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_mandi_prices(text: str, language: str = "hi",previous_context: str = "") -> str:
+def get_mandi_prices(text: str, language: str = "hi", previous_context: str = "", script: str = "native") -> str:
     # Step 1 — Extract commodity and location
     extract_prompt = f"""
     The farmer said: "{text}"
@@ -47,15 +47,18 @@ def get_mandi_prices(text: str, language: str = "hi",previous_context: str = "")
         response_prompt = f"""
         These are today's mandi prices for {commodity} in {district}:
         {price_text}
+        {history_note}
         
         Tell this to a farmer in simple language.
         Mention market name, min price, max price, modal price per quintal.
         End with one advice on whether to sell now or wait.
         """
-        return ask_gemini(response_prompt, language=language)  # language here
+        return ask_gemini(response_prompt, language=language, script=script)
     else:
         fallback_prompt = f"""
         A farmer asked about {commodity} mandi price in {district}, Uttar Pradesh.
+        {history_note}
+        
         You are an experienced agricultural expert.
         Tell them:
         1) Approximate current price range per quintal in UP
@@ -63,7 +66,7 @@ def get_mandi_prices(text: str, language: str = "hi",previous_context: str = "")
         3) To check agmarknet.gov.in or nearby mandi for exact price
         Keep it to 4-5 sentences, practical and helpful.
         """
-        return ask_gemini(fallback_prompt, language=language)
+        return ask_gemini(fallback_prompt, language=language, script=script)
 
 def fetch_from_data_gov(commodity: str, district: str) -> list:
     """Try data.gov.in API with short timeout"""
@@ -77,7 +80,7 @@ def fetch_from_data_gov(commodity: str, district: str) -> list:
             "filters[commodity]": commodity,
             "filters[district]": district
         }
-        response = requests.get(url, params=params, timeout=5)  # short timeout
+        response = requests.get(url, params=params, timeout=5)
         data = response.json()
         records = data.get("records", [])
         

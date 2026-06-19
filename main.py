@@ -108,36 +108,49 @@ def detect_language_change_command(text: str) -> str | None:
     except:
         return None
     
-def detect_language_from_text(text: str) -> str:
-    """Use LLM to detect language of typed text"""
+def detect_language_from_text(text: str) -> tuple[str, str]:
+    """Use LLM to detect language of typed text. Returns (language_code, script) - script is 'native' or 'roman' """
     prompt = f"""
-    Identify the PRIMARY language this text is written in: "{text}"
+    Analyze this text: "{text}"
     
     Important: Judge by the SCRIPT and GRAMMAR structure, not individual proper nouns or place names.
     For example, "What are wheat prices in Gorakhpur mandi today" is ENGLISH (en) — 
     even though "mandi" and "Gorakhpur" are Hindi/Indian words, the sentence structure 
     and majority of words are English.
     
-    Only classify as Hindi (hi) if the text is actually written in Hindi grammar/words 
-    (Devanagari script OR Romanized Hindi like "aaj gehu ka bhav kya hai").
+    1) What language is it? Reply with 2-letter ISO 639-1 code.
+    2) What script/alphabet is it written in? 
+       - "native" if written in the language's own script (Devanagari, Tamil script, etc.)
+       - "roman" if written in English/Latin alphabet (like "mujhe sichai ki yojna chahiye")
     
-    Reply with ONLY the 2-letter ISO 639-1 code.
-    Examples: 
-    "What are wheat prices in Gorakhpur mandi today" → en
-    "aaj gehu ka bhav kya hai" → hi
-    "गेहूं का भाव क्या है" → hi
-    "tell me farming schemes" → en
-    Bhojpuri/Awadhi/Maithili → hi
+    Examples:
+    "What are wheat prices in Gorakhpur mandi today" → LANG: en, SCRIPT: roman
+    "aaj gehu ka bhav kya hai" → LANG: hi, SCRIPT: roman
+    "गेहूं का भाव क्या है" → LANG: hi, SCRIPT: native
+    "tell me farming schemes" → LANG: en, SCRIPT: roman
+    "mujhe sichai ki yojna chahiye" → LANG: hi, SCRIPT: roman
+    "naa sahayam kavali" → LANG: te, SCRIPT: roman
+    Bhojpuri/Awadhi/Maithili → LANG: hi
     
-    Reply ONLY the 2-letter code, nothing else.
+    Reply EXACTLY in this format, nothing else:
+    LANG: hi
+    SCRIPT: roman
     """
     try:
         result = ask_llm(prompt).strip().lower()
-        result = "".join(c for c in result if c.isalpha())[:2]
+        lang = "hi"
+        script = "native"
+        for line in result.split("\n"):
+            if "lang:" in line:
+                lang_part = line.split("lang:")[-1].strip()
+                lang = "".join(c for c in lang_part if c.isalpha())[:2]
+            if "script:" in line:
+                script = "roman" if "roman" in line else "native"
         valid_codes = {"hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "or", "ur"}
-        return result if result in valid_codes else "hi"
+        lang = lang if lang in valid_codes else "hi"
+        return lang, script
     except:
-        return "hi"
+        return "hi", "native"
 
 
 @app.get("/")
@@ -159,6 +172,7 @@ async def whatsapp_webhook(
 
     current_language = user_language_cache.get(farmer_number, "hi")
     transcribed_text = ""
+    detected_script = "native"
     detected_language = current_language
 
     # --- VOICE NOTE ---
@@ -194,7 +208,7 @@ async def whatsapp_webhook(
         send_text(farmer_number, get_system_message("analyzing", detected_language))
         image_path = await download_media(MediaUrl0, "jpg")
         from features.pest import analyze_pest
-        reply = analyze_pest(image_path, detected_language)
+        reply = analyze_pest(image_path, detected_language,detected_script)
         await send_reply(farmer_number, reply, detected_language)
         return {"status": "ok"}
 
@@ -210,7 +224,7 @@ async def whatsapp_webhook(
             await send_reply(farmer_number, confirm_msg, detected_language)
             return {"status": "ok"}
 
-        detected_language = detect_language_from_text(transcribed_text)
+        detected_language, detected_script = detect_language_from_text(transcribed_text)
         user_language_cache[farmer_number] = detected_language
 
     # --- EMPTY MESSAGE CHECK ---
@@ -219,31 +233,31 @@ async def whatsapp_webhook(
         return {"status": "ok"}
 
     # --- ROUTE TO FEATURE ---
+    # --- ROUTE TO FEATURE ---
     intent = detect_intent(transcribed_text)
-    reply = await route_intent(intent, transcribed_text, detected_language,farmer_number)
+    reply = await route_intent(intent, transcribed_text, detected_language, farmer_number, detected_script)
     await send_reply(farmer_number, reply, detected_language)
-
     return {"status": "ok"}
 
 
-async def route_intent(intent: str, text: str, language: str = "hi", farmer_number: str = "") -> str:
+async def route_intent(intent: str, text: str, language: str = "hi", farmer_number: str = "", script: str = "native") -> str:
     previous_context = user_conversation_history.get(farmer_number, "")
     
     if intent == "mandi":
         from features.mandi import get_mandi_prices
-        return get_mandi_prices(text, language, previous_context)
+        return get_mandi_prices(text, language, previous_context, script)
     elif intent == "scheme":
         from features.schemes import get_schemes
-        return get_schemes(text, language, previous_context)
+        return get_schemes(text, language, previous_context, script)
     elif intent == "advisory":
         from features.advisory import get_advisory
-        return get_advisory(text, language, previous_context)
+        return get_advisory(text, language, previous_context, script)
     else:
         from utils.llm import ask_gemini
         prompt = f'The farmer said: "{text}".'
         if previous_context:
             prompt = f'Previous conversation: "{previous_context}"\n\nFarmer now said: "{text}". If this refers to the previous conversation, use that context.'
-        return ask_gemini(prompt + " Reply helpfully as an Indian agricultural assistant in 2-3 sentences.", language=language)
+        return ask_gemini(prompt + " Reply helpfully as an Indian agricultural assistant in 2-3 sentences.", language=language, script=script)
 
 
 async def send_reply(farmer_number: str, text: str, language: str = "hi"):

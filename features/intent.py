@@ -17,7 +17,7 @@ def detect_intent(text: str) -> str:
     Respond with ONLY the single classification word. Do not write any other text.
     """
     result = ask_gemini(prompt).strip().lower()
-    
+    print(f"INTENT DETECTED: {result}")
     # Safety check
     valid = ["mandi", "pest", "scheme", "advisory"]
     return result if result in valid else "unknown"
