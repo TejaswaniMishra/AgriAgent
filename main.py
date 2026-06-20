@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from utils.voice import transcribe_audio, text_to_voice
 from utils.whatsapp import send_text, send_voice
 from features.intent import detect_intent
+from utils.db import init_db, get_language, set_language, get_last_response, set_last_response
+
 
 load_dotenv()
 
@@ -18,8 +20,8 @@ app.mount("/temp", StaticFiles(directory="temp"), name="temp")
 PUBLIC_URL = os.getenv("PUBLIC_URL", "")
 
 # Session memory — farmer number -> language
-user_language_cache = {}
-user_conversation_history = {}
+
+init_db()  # app start hote hi DB/table bana dega agar nahi hai
 
 def ask_llm(prompt: str) -> str:
     from utils.llm import ask_gemini
@@ -170,7 +172,7 @@ async def whatsapp_webhook(
     farmer_number = From
     has_media = int(NumMedia) > 0
 
-    current_language = user_language_cache.get(farmer_number, "hi")
+    current_language = get_language(farmer_number)
     transcribed_text = ""
     detected_script = "native"
     detected_language = current_language
@@ -184,12 +186,12 @@ async def whatsapp_webhook(
         lang_change = detect_language_change_command(transcribed_text)
         if lang_change:
             detected_language = lang_change
-            user_language_cache[farmer_number] = detected_language
+            set_language(farmer_number , detected_language)
             confirm_msg = get_confirmation_message(detected_language)
             await send_reply(farmer_number, confirm_msg, detected_language)
             return {"status": "ok"}
         else:
-            user_language_cache[farmer_number] = detected_language
+            set_language(farmer_number,detected_language)
 
     # --- IMAGE ---
     elif has_media and MediaContentType0 and "image" in MediaContentType0:
@@ -199,7 +201,7 @@ async def whatsapp_webhook(
             lang_change = detect_language_change_command(caption)
             if lang_change:
                 detected_language = lang_change
-                user_language_cache[farmer_number] = detected_language
+                set_language(farmer_number,detected_language)
             else:
                 detected_language = current_language
         else:
@@ -219,13 +221,13 @@ async def whatsapp_webhook(
         lang_change = detect_language_change_command(transcribed_text)
         if lang_change:
             detected_language = lang_change
-            user_language_cache[farmer_number] = detected_language
+            set_language(farmer_number, detected_language)
             confirm_msg = get_confirmation_message(detected_language)
             await send_reply(farmer_number, confirm_msg, detected_language)
             return {"status": "ok"}
 
         detected_language, detected_script = detect_language_from_text(transcribed_text)
-        user_language_cache[farmer_number] = detected_language
+        set_language(farmer_number,detected_language)
 
     # --- EMPTY MESSAGE CHECK ---
     if not transcribed_text.strip():
@@ -241,7 +243,7 @@ async def whatsapp_webhook(
 
 
 async def route_intent(intent: str, text: str, language: str = "hi", farmer_number: str = "", script: str = "native") -> str:
-    previous_context = user_conversation_history.get(farmer_number, "")
+    previous_context = get_last_response(farmer_number, "")
     
     if intent == "mandi":
         from features.mandi import get_mandi_prices
@@ -263,7 +265,7 @@ async def route_intent(intent: str, text: str, language: str = "hi", farmer_numb
 async def send_reply(farmer_number: str, text: str, language: str = "hi"):
     """Send both voice note and text to farmer"""
     # Save this response as context for potential follow-up questions
-    user_conversation_history[farmer_number] = text
+    set_last_response(farmer_number,text)
     
     audio_path = text_to_voice(text, language)
     if audio_path and PUBLIC_URL:
