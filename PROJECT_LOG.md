@@ -52,10 +52,11 @@ Farmer (WhatsApp) → Twilio Webhook → FastAPI (main.py)
 |---|---|---|---|---|
 | 1 | WhatsApp voice/text/image pipeline | `main.py` | ✅ Working | Twilio webhook → FastAPI → response |
 | 2 | Pest/disease detection from photo | `features/pest.py` | ✅ Working | Groq Vision (Llama 4 Scout), no database needed — pure vision model |
-| 3 | Mandi price lookup | `features/mandi.py` | ⚠️ Working with fallback | Live data.gov.in API times out consistently; LLM gives AI-estimated price ranges as fallback |
-| 4 | Government scheme finder | `features/schemes.py` | ✅ Working | RAG-style: JSON database (24 schemes) + LLM matches relevant ones to farmer's question |
+| 3 | Mandi price lookup | `features/mandi.py` | ✅ Working (estimate-based) | Live data.gov.in API confirmed unreliable even with official sample key — see Decision 4.5. Fallback is now the realistic default, with explicit "this is an estimate" disclaimer built into the response |
+| 4 | Government scheme finder | `features/schemes.py` | ✅ Working | RAG-style: JSON database (45 schemes — expanded from initial 24) + LLM matches relevant ones to farmer's question |
 | 5 | Weather-based crop advisory | `features/advisory.py` | ✅ Working | OpenWeatherMap live weather + crop/season context → LLM advisory |
-| 6 | Multi-language auto-detect + switching | `main.py` | ✅ Working | LLM-based detection (not rule-based dictionaries) — see Decision Log |
+| 6 | Multi-language auto-detect + switching | `main.py` | ✅ Working | LLM-based detection (not rule-based dictionaries) — detects both language AND script (native vs Roman/Hinglish), matches farmer's input style |
+| 7 | Conversational memory (follow-ups) | `main.py` + all feature modules | ✅ Working | `user_conversation_history` cache — farmer can say "tell me more about the first one" and it resolves correctly against the prior response |
 
 ---
 
@@ -99,12 +100,24 @@ Farmer (WhatsApp) → Twilio Webhook → FastAPI (main.py)
 
 **Note:** Function is still named `ask_gemini()` in `utils/llm.py` for historical/compatibility reasons — it actually calls Groq. Consider renaming to `ask_llm()` for clarity in a future cleanup pass.
 
-### 4.5 Mandi prices — live API not reliable, LLM fallback kept intentionally
+### 4.5 Mandi prices — live API confirmed unreliable, fallback finalized as the working solution
 **Issue:** `api.data.gov.in` mandi price endpoint consistently times out (`ReadTimeoutError`) regardless of correct API key/filters.
 
-**Decision:** Built a fallback — if the live API returns no data within a short timeout, the LLM gives an AI-estimated price range with a disclaimer to check Agmarknet/local mandi for exact prices. This keeps the feature functional for demos rather than failing silently.
+**Investigation (root cause confirmed):** Verified the resource ID in use (`9ef84268-d588-465a-a308-a864a43d0070`) is correct by cross-checking against the official data.gov.in API docs page. Tested directly with data.gov.in's own official **sample/demo API key** (not just our own key) using a generous 15-second timeout — still timed out (`ReadTimeoutError` on `api.data.gov.in:443`). This confirms the issue is the government server's reliability itself, not our API key, resource ID, or request format. This is a known, widely-reported issue with this particular government API.
 
-**Explicitly deferred, not abandoned:** Fixing the live data source is a Round 2 task, not a v1 blocker.
+**Decision:** Stopped pursuing a fix to the live endpoint. `fetch_from_data_gov()` is kept in the code as-is (harmless — if the government API ever stabilizes, it will automatically start working again with zero code changes needed), but the **fallback path is now the realistic default**, not a backup.
+
+The fallback prompt was deliberately restructured to:
+1. Explicitly tell the farmer this is an **estimated** range, not live/confirmed data — never presented as if it were today's real price
+2. Give a realistic seasonal price range with 1-2 context factors (arrivals, demand)
+3. Point to agmarknet.gov.in / local mandi samiti / mandi gate for exact verification before a selling decision
+4. Stay warm and practical in tone rather than reading like a corporate disclaimer
+
+**Why this is the right call, not a compromise:** Showing stale/cached "live" data and labeling it as current would be actively misleading for a farmer making a real selling decision — worse than an honest, clearly-labeled estimate. This also gives a clean, honest story for the pitch: *"Real-time government API integration attempted and verified non-viable (confirmed via testing with data.gov.in's own sample key); AI-estimated pricing with clear disclaimers used as the interim solution, with live integration to resume if/when the government API stabilizes."*
+
+**Considered alternatives (not pursued):**
+- Static Kaggle dataset (`ishankat/daily-wholesale-commodity-prices-india-mandis`) — rejected because it would present non-live data as if current, same honesty problem as the original issue, just with better-looking but still stale numbers
+- Third-party sites scraping data.gov.in (mandipulse.com, kisanbridge.com) — not pursued; adds a fragile dependency on an undocumented third party for a problem we'd still inherit
 
 ---
 
@@ -128,13 +141,13 @@ These were identified as real product gaps during development but consciously de
 
 | Item | What's the gap | Planned fix |
 |---|---|---|
-| Voice transcription accuracy | Whisper `base` model weak on Indian accents/languages | Switch to **Sarvam AI** (STT model "Saaras v3" — trained on 1M+ hours of real Indian audio, supports 22 languages, code-mixing/Hinglish) |
-| Voice output naturalness | gTTS sounds robotic, limited language support | Switch to **Sarvam AI Bulbul V3** TTS — 35+ natural voices, native Hinglish code-switching |
-| Live mandi prices | data.gov.in API unreliable/times out | Investigate alternate sources; keep LLM fallback as permanent safety net regardless |
-| Scheme database size | Only 24 schemes (curated manually) | Build proper extraction pipeline from myScheme government dataset (4,180+ schemes) or the Hugging Face PDF dataset (723 schemes) |
-| Conversational memory | Farmer can't say "tell me more about the first one" — every message is stateless | Add `user_conversation_history` cache (similar pattern to `user_language_cache`); inject last response as context into new prompts |
-| Cross-language re-translation | If farmer gets a response in Gujarati then says "ab hindi mein batao," the *new* response is in Hindi but the *previous* response is not retroactively translated | Decided this is acceptable UX (matches how Alexa/Google Assistant behave) — not planned as a fix, documented as intentional behavior |
-| WhatsApp message limits | Twilio free sandbox caps at 50 messages/day | Will need WhatsApp Business API for any real demo/production use beyond sandbox testing |
+| Voice transcription accuracy | Whisper `base` model weak on Indian accents/languages — upgraded to `small` model (better, but still not India-specific) | Switch to **Sarvam AI** (STT model "Saaras v3" — trained on 1M+ hours of real Indian audio, supports 22 languages, code-mixing/Hinglish). Paused for now — free credits (₹100) reserved, will revisit. |
+| Voice output naturalness | gTTS sounds robotic, limited language support | Switch to **Sarvam AI Bulbul V3** TTS — 35+ natural voices, native Hinglish code-switching. Paused alongside STT swap above. |
+| Scheme database size | 45 schemes (curated manually, expanded from initial 24) | Build proper extraction pipeline from myScheme government dataset (4,180+ schemes) or a structured Q&A dataset (e.g. `bharatschemes-v1`) if/when time allows |
+| Deployment | Currently only runs locally via ngrok — not a permanent, shareable link | Deploy to Railway/Render for a permanent public URL |
+| Twilio message limit | Free WhatsApp Sandbox caps at 50 messages/day, repeatedly interrupts testing | Create a fresh Twilio account, or move to WhatsApp Business API for real demo/production use |
+| Persistent storage | `user_language_cache` and `user_conversation_history` are in-memory dicts — wiped on every server restart | Move to SQLite (lightweight) or Postgres for persistence across restarts |
+| Robustness/error handling | No rate limiting, minimal logging, no handling for oversized files or concurrent request edge cases | Add structured logging, basic rate limiting, and graceful handling for malformed/oversized media before any real-world use |
 
 ---
 

@@ -28,7 +28,7 @@ def get_mandi_prices(text: str, language: str = "hi", previous_context: str = ""
         if "DISTRICT:" in line:
             district = line.split("DISTRICT:")[-1].strip()
 
-    # Step 2 — Try fetching live prices
+    # Step 2 — Try fetching live prices (kept as primary path in case data.gov.in becomes reliable later)
     prices = fetch_from_data_gov(commodity, district)
     history_note = ""
     if previous_context:
@@ -45,7 +45,7 @@ def get_mandi_prices(text: str, language: str = "hi", previous_context: str = ""
     if prices:
         price_text = "\n".join(prices)
         response_prompt = f"""
-        These are today's mandi prices for {commodity} in {district}:
+        These are today's LIVE mandi prices for {commodity} in {district}:
         {price_text}
         {history_note}
         
@@ -55,21 +55,33 @@ def get_mandi_prices(text: str, language: str = "hi", previous_context: str = ""
         """
         return ask_gemini(response_prompt, language=language, script=script)
     else:
+        # Fallback — government live API unavailable, give a clearly-labeled estimate instead
         fallback_prompt = f"""
         A farmer asked about {commodity} mandi price in {district}, Uttar Pradesh.
         {history_note}
         
-        You are an experienced agricultural expert.
-        Tell them:
-        1) Approximate current price range per quintal in UP
-        2) What factors affect the price
-        3) To check agmarknet.gov.in or nearby mandi for exact price
-        Keep it to 4-5 sentences, practical and helpful.
+        You are an experienced agricultural market expert. The live government price feed 
+        is temporarily unavailable, so give a helpful estimate instead.
+        
+        Structure your answer like this:
+        1) Clearly state this is an ESTIMATED price range (not live data) — be upfront about this, 
+           do not present it as confirmed today's price.
+        2) Give a realistic price range per quintal for {commodity} in {district}/Uttar Pradesh 
+           based on typical seasonal patterns.
+        3) Mention 1-2 factors that affect the price right now (arrivals, season, demand).
+        4) Tell them to verify the exact price by checking agmarknet.gov.in, calling the local 
+           mandi samiti, or asking at the mandi gate before making a selling decision.
+        
+        Keep it warm and practical, like a knowledgeable person helping a friend — not a disclaimer-heavy 
+        corporate message. 4-5 sentences total.
         """
         return ask_gemini(fallback_prompt, language=language, script=script)
 
 def fetch_from_data_gov(commodity: str, district: str) -> list:
-    """Try data.gov.in API with short timeout"""
+    """Try data.gov.in API with short timeout. 
+    Note: This government API has proven unreliable (consistent timeouts even with the 
+    official sample key) — kept as a primary attempt in case it stabilizes, but the 
+    fallback path is the realistic default for now."""
     try:
         api_key = os.getenv("DATAGOV_API_KEY")
         url = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
