@@ -2,9 +2,14 @@ import whisper
 from gtts import gTTS
 import os
 import uuid
+import platform
 
-# Fix ffmpeg PATH — sirf bin folder ka path, file ka nahi
-os.environ["PATH"] += r";C:\Users\tejas\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-essentials_build\bin"
+import platform
+
+# Only add Windows-specific ffmpeg path locally; Render/Linux already has ffmpeg via apt.txt
+if platform.system() == "Windows":
+    os.environ["PATH"] += r";C:\Users\tejas\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-essentials_build\bin"
+
 
 # Load model with error handling
 try:
