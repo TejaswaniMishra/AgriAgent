@@ -19,8 +19,6 @@ app.mount("/temp", StaticFiles(directory="temp"), name="temp")
 
 PUBLIC_URL = os.getenv("PUBLIC_URL", "")
 
-# Session memory — farmer number -> language
-
 init_db()  # app start hote hi DB/table bana dega agar nahi hai
 
 def ask_llm(prompt: str) -> str:
@@ -96,13 +94,11 @@ def detect_language_change_command(text: str) -> str | None:
     """
     try:
         result = ask_llm(prompt).strip().lower()
-        # Clean — remove any punctuation/extra text
         result = result.replace(".", "").replace(",", "").strip()
         
         if result == "no" or "no" in result[:3]:
             return None
         
-        # Extract just first 2 alphabetic characters
         result = "".join(c for c in result if c.isalpha())[:2]
         
         valid_codes = {"hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "or", "ur"}
@@ -170,80 +166,100 @@ async def whatsapp_webhook(
     NumMedia: str = Form(default="0")
 ):
     farmer_number = From
-    has_media = int(NumMedia) > 0
 
-    current_language = get_language(farmer_number)
-    transcribed_text = ""
-    detected_script = "native"
-    detected_language = current_language
+    # --- EVERYTHING WRAPPED IN TRY-EXCEPT FOR ROBUSTNESS ---
+    # If anything fails anywhere below, the farmer still gets a reply
+    # instead of total silence, and the server doesn't crash.
+    try:
+        has_media = int(NumMedia) > 0
 
-    # --- VOICE NOTE ---
-    if has_media and MediaContentType0 and "audio" in MediaContentType0:
-        send_text(farmer_number, get_system_message("listening", current_language))
-        audio_path = await download_media(MediaUrl0, "mp3")
-        transcribed_text, detected_language = transcribe_audio(audio_path)
+        current_language = get_language(farmer_number)
+        transcribed_text = ""
+        detected_script = "native"
+        detected_language = current_language
 
-        lang_change = detect_language_change_command(transcribed_text)
-        if lang_change:
-            detected_language = lang_change
-            set_language(farmer_number , detected_language)
-            confirm_msg = get_confirmation_message(detected_language)
-            await send_reply(farmer_number, confirm_msg, detected_language)
-            return {"status": "ok"}
-        else:
-            set_language(farmer_number,detected_language)
+        # --- VOICE NOTE ---
+        if has_media and MediaContentType0 and "audio" in MediaContentType0:
+            send_text(farmer_number, get_system_message("listening", current_language))
+            audio_path = await download_media(MediaUrl0, "mp3")
+            transcribed_text, detected_language = transcribe_audio(audio_path)
 
-    # --- IMAGE ---
-    elif has_media and MediaContentType0 and "image" in MediaContentType0:
-        caption = Body.strip() if Body else ""
-
-        if caption:
-            lang_change = detect_language_change_command(caption)
+            lang_change = detect_language_change_command(transcribed_text)
             if lang_change:
                 detected_language = lang_change
-                set_language(farmer_number,detected_language)
+                set_language(farmer_number, detected_language)
+                confirm_msg = get_confirmation_message(detected_language)
+                await send_reply(farmer_number, confirm_msg, detected_language)
+                return {"status": "ok"}
+            else:
+                set_language(farmer_number, detected_language)
+
+        # --- IMAGE ---
+        elif has_media and MediaContentType0 and "image" in MediaContentType0:
+            caption = Body.strip() if Body else ""
+
+            if caption:
+                lang_change = detect_language_change_command(caption)
+                if lang_change:
+                    detected_language = lang_change
+                    set_language(farmer_number, detected_language)
+                else:
+                    detected_language = current_language
             else:
                 detected_language = current_language
-        else:
-            detected_language = current_language
 
-        send_text(farmer_number, get_system_message("analyzing", detected_language))
-        image_path = await download_media(MediaUrl0, "jpg")
-        from features.pest import analyze_pest
-        reply = analyze_pest(image_path, detected_language,detected_script)
+            send_text(farmer_number, get_system_message("analyzing", detected_language))
+            image_path = await download_media(MediaUrl0, "jpg")
+            from features.pest import analyze_pest
+            reply = analyze_pest(image_path, detected_language, detected_script)
+            await send_reply(farmer_number, reply, detected_language)
+            return {"status": "ok"}
+
+        # --- TEXT MESSAGE ---
+        else:
+            transcribed_text = Body
+
+            lang_change = detect_language_change_command(transcribed_text)
+            if lang_change:
+                detected_language = lang_change
+                set_language(farmer_number, detected_language)
+                confirm_msg = get_confirmation_message(detected_language)
+                await send_reply(farmer_number, confirm_msg, detected_language)
+                return {"status": "ok"}
+
+            detected_language, detected_script = detect_language_from_text(transcribed_text)
+            set_language(farmer_number, detected_language)
+
+        # --- EMPTY MESSAGE CHECK ---
+        if not transcribed_text.strip():
+            send_text(farmer_number, get_system_message("sorry", current_language))
+            return {"status": "ok"}
+
+        # --- ROUTE TO FEATURE ---
+        intent = detect_intent(transcribed_text)
+        reply = await route_intent(intent, transcribed_text, detected_language, farmer_number, detected_script)
         await send_reply(farmer_number, reply, detected_language)
         return {"status": "ok"}
 
-    # --- TEXT MESSAGE ---
-    else:
-        transcribed_text = Body
-
-        lang_change = detect_language_change_command(transcribed_text)
-        if lang_change:
-            detected_language = lang_change
-            set_language(farmer_number, detected_language)
-            confirm_msg = get_confirmation_message(detected_language)
-            await send_reply(farmer_number, confirm_msg, detected_language)
-            return {"status": "ok"}
-
-        detected_language, detected_script = detect_language_from_text(transcribed_text)
-        set_language(farmer_number,detected_language)
-
-    # --- EMPTY MESSAGE CHECK ---
-    if not transcribed_text.strip():
-        send_text(farmer_number, get_system_message("sorry", current_language))
-        return {"status": "ok"}
-
-    # --- ROUTE TO FEATURE ---
-    # --- ROUTE TO FEATURE ---
-    intent = detect_intent(transcribed_text)
-    reply = await route_intent(intent, transcribed_text, detected_language, farmer_number, detected_script)
-    await send_reply(farmer_number, reply, detected_language)
-    return {"status": "ok"}
+    except Exception as e:
+        print(f"WEBHOOK ERROR for {farmer_number}: {e}")
+        try:
+            fallback_lang = get_language(farmer_number)
+            error_messages = {
+                "hi": "माफ करें, अभी कुछ तकनीकी समस्या आ रही है। कृपया थोड़ी देर बाद कोशिश करें।",
+                "en": "Sorry, there's a technical issue right now. Please try again in a moment.",
+                "ta": "மன்னிக்கவும், தற்போது ஒரு தொழில்நுட்பச் சிக்கல் உள்ளது. சிறிது நேரம் கழித்து முயற்சிக்கவும்.",
+                "te": "క్షమించండి, ప్రస్తుతం సాంకేతిక సమస్య ఉంది. దయచేసి కొద్దిసేపటి తర్వాత ప్రయత్నించండి.",
+            }
+            send_text(farmer_number, error_messages.get(fallback_lang, error_messages["hi"]))
+        except Exception as inner_e:
+            # Even the error message failed to send — log it, but don't crash the webhook
+            print(f"FAILED TO SEND ERROR MESSAGE to {farmer_number}: {inner_e}")
+        return {"status": "error"}
 
 
 async def route_intent(intent: str, text: str, language: str = "hi", farmer_number: str = "", script: str = "native") -> str:
-    previous_context = get_last_response(farmer_number, "")
+    previous_context = get_last_response(farmer_number)
     
     if intent == "mandi":
         from features.mandi import get_mandi_prices
@@ -264,8 +280,7 @@ async def route_intent(intent: str, text: str, language: str = "hi", farmer_numb
 
 async def send_reply(farmer_number: str, text: str, language: str = "hi"):
     """Send both voice note and text to farmer"""
-    # Save this response as context for potential follow-up questions
-    set_last_response(farmer_number,text)
+    set_last_response(farmer_number, text)
     
     audio_path = text_to_voice(text, language)
     if audio_path and PUBLIC_URL:
@@ -277,14 +292,17 @@ async def send_reply(farmer_number: str, text: str, language: str = "hi"):
         print("Audio failed — sending text only")
         send_text(farmer_number, text)
 
+
 async def download_media(url: str, ext: str) -> str:
-    """Download media from Twilio"""
+    """Download media from Twilio, with a size limit to avoid hanging on huge files"""
     import uuid
     os.makedirs("temp", exist_ok=True)
     filepath = f"temp/{uuid.uuid4().hex}.{ext}"
 
     account_sid = os.getenv("TWILIO_ACCOUNT_SID")
     auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+
+    MAX_SIZE = 10 * 1024 * 1024  # 10 MB limit — WhatsApp voice/photos are normally well under this
 
     async with httpx.AsyncClient() as client:
         response = await client.get(
@@ -293,6 +311,11 @@ async def download_media(url: str, ext: str) -> str:
             follow_redirects=True,
             timeout=30.0
         )
+
+        if len(response.content) > MAX_SIZE:
+            print(f"Media too large: {len(response.content)} bytes, rejecting")
+            raise ValueError("Media file too large")
+
         print(f"Media download: {response.status_code} | {len(response.content)} bytes")
         with open(filepath, "wb") as f:
             f.write(response.content)
