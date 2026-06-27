@@ -57,7 +57,7 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script
             )
         else:
             response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="mixtral-8x7b-32768",
                 messages=[{"role": "user", "content": full_prompt}],
                 max_tokens=1000
             )
