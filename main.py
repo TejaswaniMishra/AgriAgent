@@ -95,7 +95,7 @@ def detect_language_change_command(text: str) -> str | None:
     try:
         result = ask_llm(prompt).strip().lower()
         result = result.replace(".", "").replace(",", "").strip()
-        
+        print(f"LANG CHANGE CHECK: '{text}' → '{result}'")
         if result == "no" or "no" in result[:3]:
             return None
         
@@ -136,6 +136,7 @@ def detect_language_from_text(text: str) -> tuple[str, str]:
     """
     try:
         result = ask_llm(prompt).strip().lower()
+        print(f"LANG DETECT: '{text}' → lang={lang}, script={script}")
         lang = "hi"
         script = "native"
         for line in result.split("\n"):
