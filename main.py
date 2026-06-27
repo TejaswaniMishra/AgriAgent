@@ -136,19 +136,20 @@ def detect_language_from_text(text: str) -> tuple[str, str]:
     """
     try:
         result = ask_llm(prompt).strip().lower()
-        print(f"LANG DETECT: '{text}' → lang={lang}, script={script}")
-        lang = "hi"
-        script = "native"
+        lang = "hi"        # ✅ pehle define karo
+        script = "native"  # ✅ pehle define karo
         for line in result.split("\n"):
             if "lang:" in line:
                 lang_part = line.split("lang:")[-1].strip()
                 lang = "".join(c for c in lang_part if c.isalpha())[:2]
             if "script:" in line:
                 script = "roman" if "roman" in line else "native"
+        print(f"LANG DETECT: '{text}' → lang={lang}, script={script}")  # ✅ baad mein print
         valid_codes = {"hi", "en", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "or", "ur"}
         lang = lang if lang in valid_codes else "hi"
         return lang, script
-    except:
+    except Exception as e:
+        print(f"LANG DETECT ERROR: {e}")
         return "hi", "native"
 
 

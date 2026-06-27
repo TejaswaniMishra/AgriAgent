@@ -28,6 +28,8 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script
     # Script instruction — decides Devanagari/native script vs Roman/Hinglish
     if script == "roman" and language != "en":
         script_instruction = f"Reply in {language_name}, but write it using ROMAN/ENGLISH alphabet only (Hinglish style, like 'aapka sawaal' not 'आपका सवाल'). Do NOT use native script."
+    elif language == "kn":
+        script_instruction = f"Reply ONLY in Kannada language, using Kannada script (ಕನ್ನಡ). This is mandatory — do not reply in Hindi or English."
     else:
         script_instruction = f"Reply ONLY in {language_name}, using its native script."
     
@@ -57,7 +59,7 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script
             )
         else:
             response = client.chat.completions.create(
-                model="mixtral-8x7b-32768",
+                model=" llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": full_prompt}],
                 max_tokens=1000
             )
