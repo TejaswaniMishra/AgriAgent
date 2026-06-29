@@ -1,16 +1,16 @@
-import google.generativeai as genai
-from groq import Groq
+from google import genai
+from google.genai import types
 import os
 import base64
 from dotenv import load_dotenv
+from groq import Groq
 
 load_dotenv()
 
-# Gemini for text
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+# New Gemini client
+gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Groq for image/vision only
+# Groq only for vision/pest detection
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script: str = "native") -> str:
@@ -29,11 +29,11 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script
     else:
         script_instruction = f"Reply ONLY in {language_name}, using its native script."
     
-    full_prompt = prompt + f"\n\nIMPORTANT: {script_instruction} Use only real correct words."
+    full_prompt = prompt + f"\n\nIMPORTANT: {script_instruction} Use only real, correct words."
     
     try:
         if image_path:
-            # Use Groq Vision for images
+            # Groq vision for pest detection
             with open(image_path, "rb") as f:
                 image_data = base64.b64encode(f.read()).decode("utf-8")
             ext = image_path.split(".")[-1].lower()
@@ -52,8 +52,11 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script
             )
             return response.choices[0].message.content
         else:
-            # Use Gemini for text
-            response = gemini_model.generate_content(full_prompt)
+            # New Gemini API for text
+            response = gemini_client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=full_prompt
+            )
             return response.text
     
     except Exception as e:
@@ -61,7 +64,5 @@ def ask_gemini(prompt: str, image_path: str = None, language: str = "hi", script
         error_messages = {
             "hi": "माफ करें, अभी जवाब देने में समस्या हो रही है।",
             "en": "Sorry, there was an error. Please try again.",
-            "ta": "மன்னிக்கவும், தற்போது பதில் சொல்ல இயலவில்லை.",
-            "te": "క్షమించండి, ప్రస్తుతం సమాధానం ఇవ్వడంలో సమస్య ఉంది.",
         }
         return error_messages.get(language, error_messages["hi"])
